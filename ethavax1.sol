@@ -1,32 +1,30 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.18;
 
 contract AssertionExample {
-    uint256 public totalSupply;
-    mapping(address => uint256) public balances;
+    address public owner;
+    mapping(address => uint256) public balance;
 
     constructor() {
-        totalSupply = 0;
+        owner = msg.sender;
     }
 
-    function mint( address _address,uint256 _amount) external {
-        require(_amount > 0, "Transfer amount must be greater than zero");
-        totalSupply += _amount;
-        balances[_address] += _amount;
+    function deposit(address _address, uint256 _amount) external payable {
+        require(_address != address(0), "Invalid address.");
+        balance[_address] += _amount;
     }
 
-    function burn(address _address,uint256 _amount) external {
-        assert(_amount < balances[_address]);
-        totalSupply -= _amount;
-        balances[_address] -= _amount;
-
+    function withdraw(address _address,uint256 amount) external payable{
+        require(msg.sender == owner, "Only the owner can withdraw.");
+        require(amount <= balance[_address], "Insufficient balance.");
+        balance[_address] -= amount;
     }
 
-    function ZeroBalance(address _address) external view {
-        
-        if (balances[_address] == 0) {
-            revert("Your Balace is 0");
+    function unsafeFunction(uint256 a, uint256 b) external pure returns (uint256) {
+        assert(a + b >= a);
+        if (b == 0) {
+            revert("Division by zero is not allowed.");
         }
-        else revert("Your Balance is not zero");
+        return a / b;
     }
 }
